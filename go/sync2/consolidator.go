@@ -30,6 +30,7 @@ type Consolidator interface {
 	Create(string) (PendingResult, bool)
 	Items() []ConsolidatorCacheItem
 	Record(query string)
+	Count(query string) int64
 }
 
 // PendingResult is a wrapper for result of a query.
@@ -83,6 +84,15 @@ func (co *consolidator) Create(query string) (PendingResult, bool) {
 	r.executing.Lock()
 	co.queries[query] = r
 	return r, true
+}
+
+func (co *consolidator) Count(query string) int64 {
+	for _, item := range co.ConsolidatorCache.Items() {
+		if item.Query == query {
+			return item.Count
+		}
+	}
+	return 0
 }
 
 // Broadcast removes the entry from current queries and releases the
