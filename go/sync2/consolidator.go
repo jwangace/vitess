@@ -86,6 +86,7 @@ func (co *consolidator) Create(query string) (PendingResult, bool) {
 	return r, true
 }
 
+// Count returns the number of wait for a "query"
 func (co *consolidator) Count(query string) int64 {
 	for _, item := range co.ConsolidatorCache.Items() {
 		if item.Query == query {
