@@ -78,6 +78,11 @@ func (fc *FakeConsolidator) Record(sql string) {
 	fc.RecordCalls = append(fc.RecordCalls, sql)
 }
 
+// Count is currently a no-op.
+func (fc *FakeConsolidator) Count(string) int64 {
+	return 0
+}
+
 // Items is currently a no-op.
 func (fc *FakeConsolidator) Items() []ConsolidatorCacheItem {
 	return nil
