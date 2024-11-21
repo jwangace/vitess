@@ -88,6 +88,7 @@ Flags:
       --config-type string                                               Config file type (omit to infer config type from file extension).
       --consolidator-stream-query-size int                               Configure the stream consolidator query size in bytes. Setting to 0 disables the stream consolidator. (default 2097152)
       --consolidator-stream-total-size int                               Configure the stream consolidator total size in bytes. Setting to 0 disables the stream consolidator. (default 134217728)
+      --consolidator-max-query-wait int                                  Configure the max wait size per query for consolidator.
       --consul_auth_static_file string                                   JSON File to read the topos/tokens from.
       --datadog-agent-host string                                        host to send spans to. if empty, no tracing will be done
       --datadog-agent-port string                                        port to send spans to. if empty, no tracing will be done
