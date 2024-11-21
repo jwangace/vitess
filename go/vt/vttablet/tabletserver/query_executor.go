@@ -716,7 +716,8 @@ func (qre *QueryExecutor) execSelect() (*sqltypes.Result, error) {
 				q.SetErr(err)
 			}
 		} else {
-			if qre.tsv.qe.consolidator.Count(sqlWithoutComments) <= qre.tsv.config.ConsolidatorMaxQueryWait {
+			maxwait := qre.tsv.config.ConsolidatorMaxQueryWait
+			if maxwait == 0 || qre.tsv.qe.consolidator.Count(sqlWithoutComments) <= maxwait {
 				qre.logStats.QuerySources |= tabletenv.QuerySourceConsolidator
 				startTime := time.Now()
 				q.Wait()

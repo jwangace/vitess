@@ -1016,7 +1016,7 @@ var defaultConfig = TabletConfig{
 	Consolidator:                Enable,
 	ConsolidatorStreamTotalSize: 128 * 1024 * 1024,
 	ConsolidatorStreamQuerySize: 2 * 1024 * 1024,
-	ConsolidatorMaxQueryWait:    256,
+	ConsolidatorMaxQueryWait:    0,
 	// The value for StreamBufferSize was chosen after trying out a few of
 	// them. Too small buffers force too many packets to be sent. Too big
 	// buffers force the clients to read them in multiple chunks and make
