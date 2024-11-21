@@ -33,8 +33,13 @@ func TestConsolidator(t *testing.T) {
 	}
 
 	orig, added := con.Create(sql)
+	count := con.Count(sql)
 	if !added {
 		t.Fatalf("expected consolidator to register a new entry")
+	}
+
+	if count != 0 {
+		t.Fatalf("expected to have 0 wait, but got %d", count)
 	}
 
 	if !reflect.DeepEqual(con.Items(), want) {
@@ -63,6 +68,11 @@ func TestConsolidator(t *testing.T) {
 	want = []ConsolidatorCacheItem{{Query: sql, Count: 1}}
 	if !reflect.DeepEqual(con.Items(), want) {
 		t.Fatalf("expected consolidator to have one items %v", con.Items())
+	}
+
+	count = con.Count(sql)
+	if count != 1 {
+		t.Fatalf("expected to have 1 wait, but got %d", count)
 	}
 
 	// Running the query again should add a new entry since the original
