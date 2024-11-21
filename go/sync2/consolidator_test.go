@@ -33,8 +33,13 @@ func TestConsolidator(t *testing.T) {
 	}
 
 	orig, added := con.Create(sql)
+	count := con.Count(sql)
 	if !added {
 		t.Fatalf("expected consolidator to register a new entry")
+	}
+
+	if count != 0 {
+		t.Fatalf("expected to have %d wait", count)
 	}
 
 	if !reflect.DeepEqual(con.Items(), want) {
