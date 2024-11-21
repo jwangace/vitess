@@ -36,4 +36,4 @@ never be promoted, neither by planned nor by emergency reparents.
 
 #### <a id="vttablet-consolidator-max-query-wait"/>--consolidator-max-query-wait flag
 
- A new CLI flag `--consolidator-max-query-wait` to set the maximum wait per query for consolidator. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.
+A new CLI flag `--consolidator-max-query-wait` to set the maximum wait per query for consolidator. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.
