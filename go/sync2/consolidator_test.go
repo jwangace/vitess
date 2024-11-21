@@ -39,7 +39,7 @@ func TestConsolidator(t *testing.T) {
 	}
 
 	if count != 0 {
-		t.Fatalf("expected to have %d wait", count)
+		t.Fatalf("expected to have 0 wait, but got %d", count)
 	}
 
 	if !reflect.DeepEqual(con.Items(), want) {
@@ -47,8 +47,13 @@ func TestConsolidator(t *testing.T) {
 	}
 
 	dup, added := con.Create(sql)
+	count = con.Count(sql)
 	if added {
 		t.Fatalf("did not expect consolidator to register a new entry")
+	}
+
+	if count != 1 {
+		t.Fatalf("expected to have 1 wait, but got %d", count)
 	}
 
 	result := &sqltypes.Result{}
