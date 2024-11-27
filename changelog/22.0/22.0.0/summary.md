@@ -8,7 +8,7 @@
 
 - **[Minor Changes](#minor-changes)**
   - **[VTTablet](#vttablet)**
-  - [VTTablet: New ResetSequences RPC](#vttablet-consolidator-max-query-wait)
+  - [VTTablet: New ResetSequences RPC](#vttablet-consolidator-query-waiter-cap)
 
 ## <a id="major-changes"/>Major Changes</a>
 
@@ -34,6 +34,6 @@ never be promoted, neither by planned nor by emergency reparents.
 
 ### <a id="vttablet"/>VTTablet
 
-#### <a id="vttablet-consolidator-max-query-wait"/>--consolidator-max-query-wait flag
+#### <a id="vttablet-consolidator-query-waiter-cap"/>--consolidator-query-waiter-cap flag
 
-A new CLI flag `--consolidator-max-query-wait` to set the maximum wait per query for consolidator. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.
+A new CLI flag `--consolidator-query-waiter-cap` to set the maximum number of clients we allow to wait on the consolidator for each query. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.

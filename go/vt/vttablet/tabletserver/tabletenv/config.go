@@ -190,7 +190,7 @@ func registerTabletEnvFlags(fs *pflag.FlagSet) {
 	flagutil.DualFormatBoolVar(fs, &enableConsolidatorReplicas, "enable_consolidator_replicas", false, "This option enables the query consolidator only on replicas.")
 	fs.Int64Var(&currentConfig.ConsolidatorStreamQuerySize, "consolidator-stream-query-size", defaultConfig.ConsolidatorStreamQuerySize, "Configure the stream consolidator query size in bytes. Setting to 0 disables the stream consolidator.")
 	fs.Int64Var(&currentConfig.ConsolidatorStreamTotalSize, "consolidator-stream-total-size", defaultConfig.ConsolidatorStreamTotalSize, "Configure the stream consolidator total size in bytes. Setting to 0 disables the stream consolidator.")
-	fs.Int64Var(&currentConfig.ConsolidatorQueryWaiterCap, "consolidator-query-waiter-cap", defaultConfig.ConsolidatorMaxQueryWait, "The maximum number of clients we allow to wait on the consolidator for each query.")
+	fs.Int64Var(&currentConfig.ConsolidatorQueryWaiterCap, "consolidator-query-waiter-cap", defaultConfig.ConsolidatorQueryWaiterCap, "The maximum number of clients we allow to wait on the consolidator for each query.")
 
 	fs.DurationVar(&healthCheckInterval, "health_check_interval", defaultConfig.Healthcheck.Interval, "Interval between health checks")
 	fs.DurationVar(&degradedThreshold, "degraded_threshold", defaultConfig.Healthcheck.DegradedThreshold, "replication lag after which a replica is considered degraded")
@@ -317,7 +317,7 @@ type TabletConfig struct {
 	StreamBufferSize            int           `json:"streamBufferSize,omitempty"`
 	ConsolidatorStreamTotalSize int64         `json:"consolidatorStreamTotalSize,omitempty"`
 	ConsolidatorStreamQuerySize int64         `json:"consolidatorStreamQuerySize,omitempty"`
-	ConsolidatorMaxQueryWait    int64         `json:"consolidatorMaxQueryWait,omitempty"`
+	ConsolidatorQueryWaiterCap    int64         `json:"consolidatorMaxQueryWait,omitempty"`
 	QueryCacheMemory            int64         `json:"queryCacheMemory,omitempty"`
 	QueryCacheDoorkeeper        bool          `json:"queryCacheDoorkeeper,omitempty"`
 	SchemaReloadInterval        time.Duration `json:"schemaReloadIntervalSeconds,omitempty"`
@@ -1016,7 +1016,7 @@ var defaultConfig = TabletConfig{
 	Consolidator:                Enable,
 	ConsolidatorStreamTotalSize: 128 * 1024 * 1024,
 	ConsolidatorStreamQuerySize: 2 * 1024 * 1024,
-	ConsolidatorMaxQueryWait:    0,
+	ConsolidatorQueryWaiterCap:    0,
 	// The value for StreamBufferSize was chosen after trying out a few of
 	// them. Too small buffers force too many packets to be sent. Too big
 	// buffers force the clients to read them in multiple chunks and make
