@@ -83,6 +83,19 @@ func (fc *FakeConsolidator) Items() []ConsolidatorCacheItem {
 	return nil
 }
 
+// WaiterCountOfQuery is currently a no-op.
+func (fr *FakeConsolidator) WaiterCountOfQuery(query string) int64 {
+	return int64(0)
+}
+
+// WaiterCountOfTotal is currently a no-op.
+func (fr *FakeConsolidator) WaiterCountOfTotal() int64 {
+	return int64(0)
+}
+
+// RemoveWaiterFromTotal is currently a no-op.
+func (fr *FakeConsolidator) RemoveWaiterFromTotal(query string) {}
+
 // Broadcast records the Broadcast call for later verification.
 func (fr *FakePendingResult) Broadcast() {
 	fr.BroadcastCalls++

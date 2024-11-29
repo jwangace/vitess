@@ -702,9 +702,11 @@ func (qre *QueryExecutor) execSelect() (*sqltypes.Result, error) {
 	}
 	// Check tablet type.
 	if qre.shouldConsolidate() {
-		q, original := qre.tsv.qe.consolidator.Create(sqlWithoutComments)
+		c := qre.tsv.qe.consolidator
+		q, original := c.Create(sqlWithoutComments)
 		if original {
 			defer q.Broadcast()
+			defer c.RemoveWaiterFromTotal(sqlWithoutComments)
 			conn, err := qre.getConn()
 
 			if err != nil {
@@ -716,10 +718,13 @@ func (qre *QueryExecutor) execSelect() (*sqltypes.Result, error) {
 				q.SetErr(err)
 			}
 		} else {
-			qre.logStats.QuerySources |= tabletenv.QuerySourceConsolidator
-			startTime := time.Now()
-			q.Wait()
-			qre.tsv.stats.WaitTimings.Record("Consolidations", startTime)
+			waiterCap := qre.tsv.config.ConsolidatorQueryWaiterCap
+			if waiterCap == 0 || c.WaiterCountOfTotal() <= waiterCap {
+				qre.logStats.QuerySources |= tabletenv.QuerySourceConsolidator
+				startTime := time.Now()
+				q.Wait()
+				qre.tsv.stats.WaitTimings.Record("Consolidations", startTime)
+			}
 		}
 		if q.Err() != nil {
 			return nil, q.Err()

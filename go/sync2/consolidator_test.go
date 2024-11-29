@@ -26,6 +26,7 @@ import (
 func TestConsolidator(t *testing.T) {
 	con := NewConsolidator()
 	sql := "select * from SomeTable"
+	second_sql := "select * from AnotherTable"
 
 	want := []ConsolidatorCacheItem{}
 	if !reflect.DeepEqual(con.Items(), want) {
@@ -83,4 +84,13 @@ func TestConsolidator(t *testing.T) {
 		t.Fatalf("expected consolidator to have two items %v", con.Items())
 	}
 
+	if con.WaiterCountOfTotal() != 2 || con.WaiterCountOfQuery(sql) != 2 {
+		t.Fatalf("expected consolidator to have WaiterCountOfTotal %v and WaiterCountOfQuery %v", con.WaiterCountOfTotal(), con.WaiterCountOfQuery(sql))
+	}
+
+	con.Create(second_sql)
+
+	if con.WaiterCountOfTotal() != 2 || con.WaiterCountOfQuery(second_sql) != 0 {
+		t.Fatalf("expected consolidator to have WaiterCountOfTotal %v and WaiterCountOfQuery %v", con.WaiterCountOfTotal(), con.WaiterCountOfQuery(second_sql))
+	}
 }

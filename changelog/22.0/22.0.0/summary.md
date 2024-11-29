@@ -6,6 +6,9 @@
   - **[RPC Changes](#rpc-changes)**
   - **[Prefer not promoting a replica that is currently taking a backup](#reparents-prefer-not-backing-up)**
 
+- **[Minor Changes](#minor-changes)**
+  - **[VTTablet](#vttablet)**
+  - [VTTablet: New ResetSequences RPC](#vttablet-consolidator-query-waiter-cap)
 
 ## <a id="major-changes"/>Major Changes</a>
 
@@ -26,3 +29,11 @@ valid candidates. This means they will never get promoted - not even if there's 
 
 Note that behavior for `builtin` backups remains unchanged: a replica that is currently taking a `builtin` backup will
 never be promoted, neither by planned nor by emergency reparents.
+
+## <a id="minor-changes"/>Minor Changes
+
+### <a id="vttablet"/>VTTablet
+
+#### <a id="vttablet-consolidator-query-waiter-cap"/>--consolidator-query-waiter-cap flag
+
+A new CLI flag `--consolidator-query-waiter-cap` to set the maximum number of clients allowed to wait on the consolidator. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.
