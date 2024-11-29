@@ -30,6 +30,9 @@ type Consolidator interface {
 	Create(string) (PendingResult, bool)
 	Items() []ConsolidatorCacheItem
 	Record(query string)
+	WaiterCountOfQuery(query string) int64
+	WaiterCountOfTotal() int64
+	RemoveWaiterFromTotal(query string)
 }
 
 // PendingResult is a wrapper for result of a query.
@@ -85,6 +88,26 @@ func (co *consolidator) Create(query string) (PendingResult, bool) {
 	return r, true
 }
 
+// WaiterCountOfQuery returns the waiting count, for specified query.
+func (co *consolidator) WaiterCountOfQuery(query string) int64 {
+	if c, ok := co.ConsolidatorCache.Get(query); ok {
+		return atomic.LoadInt64((*int64)(c))
+	}
+	return int64(0)
+}
+
+// WaiterCountOfTotal returns *int64
+// which holds the total number of waiting count, for all queries.
+func (co *consolidator) WaiterCountOfTotal() int64 {
+	return atomic.LoadInt64(co.totalWaiterCount)
+}
+
+// RemoveWaiterFromTotal removes waiting count of specified query
+// from total number of waiting count.
+func (co *consolidator) RemoveWaiterFromTotal(query string) {
+	atomic.AddInt64(co.totalWaiterCount, co.WaiterCountOfQuery(query)*-1)
+}
+
 // Broadcast removes the entry from current queries and releases the
 // lock on its Result. Broadcast should be invoked when original
 // query completes execution.
@@ -128,11 +151,12 @@ func (rs *pendingResult) Wait() {
 // have been queued and had to wait because they targeted the same row (range).
 type ConsolidatorCache struct {
 	*cache.LRUCache[*ccount]
+	totalWaiterCount *int64
 }
 
 // NewConsolidatorCache creates a new cache with the given capacity.
 func NewConsolidatorCache(capacity int64) *ConsolidatorCache {
-	return &ConsolidatorCache{cache.NewLRUCache[*ccount](capacity)}
+	return &ConsolidatorCache{cache.NewLRUCache[*ccount](capacity), new(int64)}
 }
 
 // Record increments the count for "query" by 1.
@@ -144,6 +168,7 @@ func (cc *ConsolidatorCache) Record(query string) {
 		c := ccount(1)
 		cc.Set(query, &c)
 	}
+	atomic.AddInt64(cc.totalWaiterCount, int64(1))
 }
 
 // ConsolidatorCacheItem is a wrapper for the items in the consolidator cache
