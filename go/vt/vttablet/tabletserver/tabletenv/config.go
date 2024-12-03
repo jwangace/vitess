@@ -191,7 +191,7 @@ func registerTabletEnvFlags(fs *pflag.FlagSet) {
 	fs.Int64Var(&currentConfig.ConsolidatorStreamQuerySize, "consolidator-stream-query-size", defaultConfig.ConsolidatorStreamQuerySize, "Configure the stream consolidator query size in bytes. Setting to 0 disables the stream consolidator.")
 	fs.Int64Var(&currentConfig.ConsolidatorStreamTotalSize, "consolidator-stream-total-size", defaultConfig.ConsolidatorStreamTotalSize, "Configure the stream consolidator total size in bytes. Setting to 0 disables the stream consolidator.")
 
-	fs.Int64Var(&currentConfig.ConsolidatorQueryWaiterCap, "consolidator-query-waiter-cap", defaultConfig.ConsolidatorQueryWaiterCap, "Configure the maximum number of clients allowed to wait on the consolidator.")
+	fs.Int64Var(&currentConfig.ConsolidatorQueryWaiterCap, "consolidator-query-waiter-cap", 0, "Configure the maximum number of clients allowed to wait on the consolidator.")
 	fs.DurationVar(&healthCheckInterval, "health_check_interval", defaultConfig.Healthcheck.Interval, "Interval between health checks")
 	fs.DurationVar(&degradedThreshold, "degraded_threshold", defaultConfig.Healthcheck.DegradedThreshold, "replication lag after which a replica is considered degraded")
 	fs.DurationVar(&unhealthyThreshold, "unhealthy_threshold", defaultConfig.Healthcheck.UnhealthyThreshold, "replication lag after which a replica is considered unhealthy")
@@ -1016,7 +1016,6 @@ var defaultConfig = TabletConfig{
 	Consolidator:                Enable,
 	ConsolidatorStreamTotalSize: 128 * 1024 * 1024,
 	ConsolidatorStreamQuerySize: 2 * 1024 * 1024,
-	ConsolidatorQueryWaiterCap:  0,
 	// The value for StreamBufferSize was chosen after trying out a few of
 	// them. Too small buffers force too many packets to be sent. Too big
 	// buffers force the clients to read them in multiple chunks and make
