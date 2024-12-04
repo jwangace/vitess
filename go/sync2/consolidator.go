@@ -32,7 +32,6 @@ type Consolidator interface {
 	Record(query string)
 	WaiterCountOfQuery(query string) int64
 	WaiterCountOfTotal() int64
-	RemoveWaiterFromTotal(query string)
 }
 
 // PendingResult is a wrapper for result of a query.
@@ -43,6 +42,7 @@ type PendingResult interface {
 	SetResult(*sqltypes.Result)
 	Result() *sqltypes.Result
 	Wait()
+	RemoveOneCount()
 }
 
 type consolidator struct {
@@ -96,16 +96,10 @@ func (co *consolidator) WaiterCountOfQuery(query string) int64 {
 	return int64(0)
 }
 
-// WaiterCountOfTotal returns *int64
+// WaiterCountOfTotal returns int64
 // which holds the total number of waiting count, for all queries.
 func (co *consolidator) WaiterCountOfTotal() int64 {
 	return atomic.LoadInt64(co.totalWaiterCount)
-}
-
-// RemoveWaiterFromTotal removes waiting count of specified query
-// from total number of waiting count.
-func (co *consolidator) RemoveWaiterFromTotal(query string) {
-	atomic.AddInt64(co.totalWaiterCount, co.WaiterCountOfQuery(query)*-1)
 }
 
 // Broadcast removes the entry from current queries and releases the
@@ -143,6 +137,10 @@ func (rs *pendingResult) SetResult(res *sqltypes.Result) {
 func (rs *pendingResult) Wait() {
 	rs.consolidator.Record(rs.query)
 	rs.executing.RLock()
+}
+
+func (rs *pendingResult) RemoveOneCount() {
+	atomic.AddInt64(rs.consolidator.totalWaiterCount, int64(-1))
 }
 
 // ConsolidatorCache is a thread-safe object used for counting how often recent

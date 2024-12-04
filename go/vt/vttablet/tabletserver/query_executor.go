@@ -706,7 +706,6 @@ func (qre *QueryExecutor) execSelect() (*sqltypes.Result, error) {
 		q, original := c.Create(sqlWithoutComments)
 		if original {
 			defer q.Broadcast()
-			defer c.RemoveWaiterFromTotal(sqlWithoutComments)
 			conn, err := qre.getConn()
 
 			if err != nil {
@@ -724,6 +723,7 @@ func (qre *QueryExecutor) execSelect() (*sqltypes.Result, error) {
 				startTime := time.Now()
 				q.Wait()
 				qre.tsv.stats.WaitTimings.Record("Consolidations", startTime)
+				q.RemoveOneCount()
 			}
 		}
 		if q.Err() != nil {

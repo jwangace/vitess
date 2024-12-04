@@ -18,7 +18,9 @@ package sync2
 
 import (
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 
 	"vitess.io/vitess/go/sqltypes"
 )
@@ -88,9 +90,72 @@ func TestConsolidator(t *testing.T) {
 		t.Fatalf("expected consolidator to have WaiterCountOfTotal %v and WaiterCountOfQuery %v", con.WaiterCountOfTotal(), con.WaiterCountOfQuery(sql))
 	}
 
-	con.Create(second_sql)
+	third, _ := con.Create(second_sql)
 
 	if con.WaiterCountOfTotal() != 2 || con.WaiterCountOfQuery(second_sql) != 0 {
 		t.Fatalf("expected consolidator to have WaiterCountOfTotal %v and WaiterCountOfQuery %v", con.WaiterCountOfTotal(), con.WaiterCountOfQuery(second_sql))
+	}
+
+	// Remove 2 wait count, prepare for concurrnt tests
+	third.RemoveOneCount()
+	third.RemoveOneCount()
+
+	// Run same_query_times concurrently for sql and second_sql
+	// Expect WaiterCountOfTotal() equals to (same_query_times)
+	// Also test WaiterCountOfTotal() is concurrent safe
+	same_query_times := 100
+	var wg1 sync.WaitGroup
+	var wg2 sync.WaitGroup
+	var wg3 sync.WaitGroup
+
+	go func() {
+		for i := 0; i < same_query_times; i++ {
+			wg1.Add(1)
+			go func(i int) {
+				defer wg1.Done()
+				this, _ := con.Create(sql)
+				go func() {
+					this.Wait()
+				}()
+			}(i)
+		}
+	}()
+
+	go func() {
+		for i := 0; i < same_query_times; i++ {
+			wg2.Add(1)
+			go func(i int) {
+				defer wg2.Done()
+				this, _ := con.Create(second_sql)
+				go func() {
+					this.Wait()
+				}()
+			}(i)
+		}
+	}()
+
+	// Test RemoveOneCount() is concurrent safe
+	// Remove same_query_times concurrently for second_sql
+	go func() {
+		for i := 0; i < same_query_times; i++ {
+			wg2.Add(1)
+			go func(i int) {
+				defer wg2.Done()
+				this, _ := con.Create(second_sql)
+				go func() {
+					this.RemoveOneCount()
+				}()
+			}(i)
+		}
+	}()
+
+	time.Sleep(500 * time.Millisecond)
+
+	wg1.Wait()
+	wg2.Wait()
+	wg3.Wait()
+
+	if con.WaiterCountOfTotal() != int64(same_query_times) {
+		t.Fatalf("expected consolidator to have WaiterCountOfTotal %v", int64(same_query_times))
 	}
 }

@@ -93,9 +93,6 @@ func (fr *FakeConsolidator) WaiterCountOfTotal() int64 {
 	return int64(0)
 }
 
-// RemoveWaiterFromTotal is currently a no-op.
-func (fr *FakeConsolidator) RemoveWaiterFromTotal(query string) {}
-
 // Broadcast records the Broadcast call for later verification.
 func (fr *FakePendingResult) Broadcast() {
 	fr.BroadcastCalls++
@@ -125,3 +122,6 @@ func (fr *FakePendingResult) SetResult(result *sqltypes.Result) {
 func (fr *FakePendingResult) Wait() {
 	fr.WaitCalls++
 }
+
+// RemoveOneCount is currently a no-op.
+func (fr *FakePendingResult) RemoveOneCount() {}
