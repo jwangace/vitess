@@ -11,6 +11,9 @@
 - **[Minor Changes](#minor-changes)**
   - **[VTTablet Flags](#flags-vttablet)**
 
+- **[Minor Changes](#minor-changes)**
+  - **[VTTablet](#vttablet)**
+  - [VTTablet: Query Consolidation Waiter Cap](#vttablet-consolidator-query-waiter-cap)
 
 ## <a id="major-changes"/>Major Changes</a>
 
@@ -67,3 +70,11 @@ To upgrade to the newer version of the configuration file, first switch to using
 - `twopc_abandon_age` flag now supports values in the time.Duration format (e.g., 1s, 2m, 1h). 
 While the flag will continue to accept float values (interpreted as seconds) for backward compatibility, 
 **float inputs are deprecated** and will be removed in a future release.
+
+## <a id="minor-changes"/>Minor Changes
+
+### <a id="vttablet"/>VTTablet
+
+#### <a id="vttablet-consolidator-query-waiter-cap"/>--consolidator-query-waiter-cap flag
+
+A new CLI flag `--consolidator-query-waiter-cap` to set the maximum number of clients allowed to wait on the consolidator. The default value is set to 0 for unlimited wait. Users can adjust this value based on the performance of VTTablet to avoid excessive memory usage and the risk of being OOMKilled, particularly in Kubernetes deployments.
